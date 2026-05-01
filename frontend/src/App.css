@@ -1,0 +1,606 @@
+:root {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.5;
+  color: #0f172a;
+  background: #f1f5f9;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.khqr-flow h1 {
+  font-size: 1.35rem;
+  font-weight: 650;
+  margin: 0 0 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.field span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.field input {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.actions button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.actions button:last-of-type {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* KHQR receipt-style card */
+.khqr-card {
+  margin-top: 1.25rem;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow:
+    0 4px 24px rgb(15 23 42 / 10%),
+    0 1px 3px rgb(15 23 42 / 6%);
+  overflow: hidden;
+}
+
+.khqr-card-header {
+  margin: 0;
+  padding: 0.9rem 1rem 1.1rem;
+  background: #e31837;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-indent: 0.12em;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 28px) 100%, 0 100%);
+}
+
+.khqr-card-body {
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.khqr-card-merchant {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.khqr-card-amount {
+  margin: 0 0 0.75rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.khqr-countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0 0;
+}
+
+.khqr-countdown-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #e31837;
+  letter-spacing: 0.02em;
+}
+
+.khqr-countdown-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: lowercase;
+}
+
+.khqr-card-rule {
+  height: 0;
+  margin: 0 0 1rem;
+  border: none;
+  border-top: 2px dotted #cbd5e1;
+}
+
+.khqr-qr-wrap {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin: 0 auto 0.75rem;
+  line-height: 0;
+}
+
+.khqr-qr-wrap svg {
+  display: block;
+}
+
+.khqr-qr-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 4px #fff;
+  pointer-events: none;
+}
+
+.khqr-card-mds {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-align: center;
+  font-family: ui-monospace, monospace;
+  word-break: break-all;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.success {
+  color: #047857;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.info {
+  color: #334155;
+  margin: 0 0 0.5rem;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.muted code {
+  font-size: 0.7rem;
+  word-break: break-all;
+}
+
+details.muted {
+  max-width: 100%;
+}
+
+/* App tabs */
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-nav button {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #334155;
+}
+
+.app-nav button.active {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.app-shell--lumho {
+  max-width: 100%;
+  padding: 0;
+}
+
+.app-shell--owner {
+  max-width: 980px;
+}
+
+.owner-dashboard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.owner-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.owner-head button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.owner-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.owner-kpis article {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.owner-kpis h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.owner-kpis p {
+  margin: 0.2rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.owner-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.owner-panel h3 {
+  margin-top: 0;
+}
+
+.owner-orders {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.owner-order-row {
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+/* Lumho Telegram menu + pay */
+.lumho-root {
+  --lumho-primary: #2d5a27;
+  --lumho-bg: #f8f9f5;
+  --lumho-surface: #ffffff;
+  --lumho-sage: #e8f0e5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--lumho-bg);
+  color: #1a1c19;
+  min-height: 100vh;
+  padding: 15px;
+  padding-bottom: 110px;
+  box-sizing: border-box;
+}
+
+.lumho-header-title {
+  color: var(--lumho-primary);
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+.lumho-filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  position: sticky;
+  top: 0;
+  background: var(--lumho-bg);
+  z-index: 10;
+  padding: 5px 0;
+}
+
+.lumho-filter-btn {
+  background: var(--lumho-surface);
+  border: 1px solid var(--lumho-sage);
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: inherit;
+}
+
+.lumho-filter-btn.active {
+  background: var(--lumho-primary);
+  color: #fff;
+  border-color: var(--lumho-primary);
+  font-weight: 600;
+}
+
+.lumho-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lumho-item-card {
+  background: var(--lumho-surface);
+  border-radius: 18px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.lumho-item-card img {
+  width: 85px;
+  height: 85px;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  background: #f0f0f0;
+  object-fit: cover;
+}
+
+.lumho-item-name {
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lumho-item-price {
+  color: var(--lumho-primary);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.lumho-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  z-index: 100;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.lumho-sheet-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lumho-bottom-sheet {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 25px;
+  z-index: 101;
+  transition: bottom 0.35s ease;
+  border-radius: 25px 25px 0 0;
+  box-sizing: border-box;
+}
+
+.lumho-bottom-sheet.show {
+  bottom: 0;
+}
+
+.lumho-sheet-title {
+  margin: 0 0 12px;
+}
+
+.lumho-sheet-label {
+  font-size: 12px;
+  font-weight: bold;
+  display: block;
+  margin-top: 8px;
+}
+
+.lumho-selector {
+  display: flex;
+  background: var(--lumho-sage);
+  border-radius: 12px;
+  padding: 4px;
+  margin: 10px 0;
+  gap: 2px;
+}
+
+.lumho-selector button {
+  flex: 1;
+  text-align: center;
+  padding: 10px 4px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.lumho-selector button.active {
+  background: var(--lumho-primary);
+  color: #fff;
+}
+
+.lumho-note {
+  width: 100%;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 10px;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.lumho-sheet-cta {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.lumho-footer-cart {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: var(--lumho-primary);
+  color: #fff;
+  padding: 18px;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  z-index: 90;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.lumho-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.lumho-btn-primary {
+  background: var(--lumho-primary);
+  color: #fff;
+}
+
+.lumho-btn-ghost {
+  background: transparent;
+  color: var(--lumho-primary);
+}
+
+.lumho-pay-screen {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 12px 8px 24px;
+}
+
+.lumho-pay-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.lumho-pay-toolbar-title {
+  font-weight: 700;
+  color: var(--lumho-primary);
+}
+
+.lumho-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
+.lumho-muted {
+  text-align: center;
+  color: #64748b;
+  margin: 24px 0;
+}
+
+.lumho-khqr-card {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lumho-pay-done {
+  text-align: center;
+  padding: 48px 20px 24px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.lumho-pay-done-icon {
+  width: 64px;
+  height: 64px;
+  line-height: 64px;
+  border-radius: 50%;
+  background: var(--lumho-primary);
+  color: #fff;
+  font-size: 2rem;
+  margin: 0 auto 16px;
+}
+
+.lumho-pay-done-title {
+  margin: 0 0 8px;
+  color: var(--lumho-primary);
+}
+
+.lumho-pay-done-sub {
+  margin: 0 0 24px;
+  color: #64748b;
+  font-size: 0.95rem;
+}

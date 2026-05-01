@@ -1,0 +1,28 @@
+{
+  "name": "test-khr-qr",
+  "version": "1.0.0",
+  "description": "Express + Bakong KHQR + React payment flow",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "nodemon server/index.js",
+    "start": "node server/index.js",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "test": "node --test server/*.test.js",
+    "test:all": "npm test && npm run lint --prefix frontend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.15.2",
+    "bakong-khqr": "^1.0.20",
+    "better-sqlite3": "^12.9.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
+  }
+}
