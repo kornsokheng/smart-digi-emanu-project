@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/paymentApi";
 
 const POLL_MS = 2000;
+const PAYMENT_CHECK_GRACE_MS = 2 * 60 * 1000;
 
 function formatAmount(currency, amount) {
     if (currency === "USD") {
@@ -19,6 +20,7 @@ function currencyCenterSymbol(currency) {
 export function KhqrPaymentFlow() {
     const [userId, setUserId] = useState("demo-user-1");
     const [qrPayload, setQrPayload] = useState(null);
+    const [orderId, setOrderId] = useState(null);
     const [md5, setMd5] = useState(null);
     const [expiresAtMs, setExpiresAtMs] = useState(null);
     const [statusMessage, setStatusMessage] = useState("");
@@ -39,6 +41,7 @@ export function KhqrPaymentFlow() {
     const handleExpired = useCallback(() => {
         clearPoll();
         setQrPayload(null);
+        setOrderId(null);
         setMd5(null);
         setExpiresAtMs(null);
         setPayMeta(null);
@@ -50,14 +53,17 @@ export function KhqrPaymentFlow() {
 
     const checkPaymentOnce = useCallback(async () => {
         if (!userId.trim()) return;
-        if (expiresAtMs != null && Date.now() >= expiresAtMs) {
+        if (
+            expiresAtMs != null &&
+            Date.now() >= expiresAtMs + PAYMENT_CHECK_GRACE_MS
+        ) {
             handleExpired();
             return;
         }
         try {
             const res = await api("/api/payment/check", {
                 method: "POST",
-                body: JSON.stringify({ userId: userId.trim() }),
+                body: JSON.stringify({ userId: userId.trim(), orderId }),
             });
             if (res.ok) {
                 const data = await res.json();
@@ -76,7 +82,7 @@ export function KhqrPaymentFlow() {
         } catch (e) {
             setError(e instanceof Error ? e.message : "Network error");
         }
-    }, [userId, expiresAtMs, clearPoll, handleExpired]);
+    }, [userId, orderId, expiresAtMs, clearPoll, handleExpired]);
 
     useEffect(() => {
         return () => clearPoll();
@@ -87,7 +93,7 @@ export function KhqrPaymentFlow() {
 
         const id = window.setInterval(() => {
             const t = Date.now();
-            if (t >= expiresAtMs) {
+            if (t >= expiresAtMs + PAYMENT_CHECK_GRACE_MS) {
                 handleExpired();
                 return;
             }
@@ -123,6 +129,7 @@ export function KhqrPaymentFlow() {
                 return;
             }
             setQrPayload(data.qr);
+            setOrderId(data.orderId ?? null);
             setMd5(data.md5 ?? null);
             setMerchantLabel(
                 typeof data.merchantName === "string" && data.merchantName
@@ -175,6 +182,7 @@ export function KhqrPaymentFlow() {
                         onClick={() => {
                             clearPoll();
                             setQrPayload(null);
+                            setOrderId(null);
                             setMd5(null);
                             setExpiresAtMs(null);
                             setConfirmed(false);

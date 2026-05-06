@@ -4,6 +4,7 @@ const {
 } = require("../services/bakongTransaction");
 const {
     appendOrderEvent,
+    getOrderById,
     getLatestPendingOrderForUser,
     markOrderPaid,
 } = require("../db");
@@ -23,8 +24,27 @@ async function verifyPayment(req, res) {
         return res.status(500).json({ error: "BAKONG_MERCHANT_TOKEN is not configured" });
     }
 
-    const order = await getLatestPendingOrderForUser(userId);
+    const orderId = req.body?.orderId ?? req.body?.order_id;
+    const order = orderId
+        ? await getOrderById(Number(orderId))
+        : await getLatestPendingOrderForUser(userId);
     if (!order) {
+        return res.status(404).json({
+            error: "No active pending transaction for this user",
+            code: "NOT_FOUND_OR_PENDING",
+        });
+    }
+    if (String(order.user_id) !== String(userId)) {
+        return res.status(403).json({ error: "Order does not belong to this user" });
+    }
+    if (order.status === "paid") {
+        return res.json({
+            success: true,
+            message: "Payment confirmed",
+            orderId: order.id,
+        });
+    }
+    if (order.status !== "pending") {
         return res.status(404).json({
             error: "No active pending transaction for this user",
             code: "NOT_FOUND_OR_PENDING",

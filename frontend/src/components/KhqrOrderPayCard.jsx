@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/paymentApi";
 
 const POLL_MS = 2000;
+const PAYMENT_CHECK_GRACE_MS = 2 * 60 * 1000;
 
 function formatAmount(currency, amount) {
     if (currency === "USD") {
@@ -28,6 +29,7 @@ export function KhqrOrderPayCard({
     onPaidContinue,
 }) {
     const [qrPayload, setQrPayload] = useState(null);
+    const [orderId, setOrderId] = useState(null);
     const [md5, setMd5] = useState(null);
     const [expiresAtMs, setExpiresAtMs] = useState(null);
     const [error, setError] = useState("");
@@ -48,6 +50,7 @@ export function KhqrOrderPayCard({
     const handleExpired = useCallback(() => {
         clearPoll();
         setQrPayload(null);
+        setOrderId(null);
         setMd5(null);
         setExpiresAtMs(null);
         setPayMeta(null);
@@ -57,14 +60,17 @@ export function KhqrOrderPayCard({
 
     const checkPaymentOnce = useCallback(async () => {
         if (!userId.trim()) return;
-        if (expiresAtMs != null && Date.now() >= expiresAtMs) {
+        if (
+            expiresAtMs != null &&
+            Date.now() >= expiresAtMs + PAYMENT_CHECK_GRACE_MS
+        ) {
             handleExpired();
             return;
         }
         try {
             const res = await api("/api/payment/check", {
                 method: "POST",
-                body: JSON.stringify({ userId: userId.trim() }),
+                body: JSON.stringify({ userId: userId.trim(), orderId }),
             });
             if (res.ok) {
                 const data = await res.json();
@@ -81,7 +87,7 @@ export function KhqrOrderPayCard({
         } catch (e) {
             setError(e instanceof Error ? e.message : "Network error");
         }
-    }, [userId, expiresAtMs, clearPoll, handleExpired, onPaid]);
+    }, [userId, orderId, expiresAtMs, clearPoll, handleExpired, onPaid]);
 
     useEffect(() => {
         checkRef.current = checkPaymentOnce;
@@ -95,7 +101,7 @@ export function KhqrOrderPayCard({
         if (!qrPayload || confirmed || expiresAtMs == null) return;
         const id = window.setInterval(() => {
             const t = Date.now();
-            if (t >= expiresAtMs) {
+            if (t >= expiresAtMs + PAYMENT_CHECK_GRACE_MS) {
                 handleExpired();
                 return;
             }
@@ -119,6 +125,7 @@ export function KhqrOrderPayCard({
             setError("");
             setConfirmed(false);
             setQrPayload(null);
+            setOrderId(null);
             setMd5(null);
             setExpiresAtMs(null);
             setPayMeta(null);
@@ -145,6 +152,7 @@ export function KhqrOrderPayCard({
                     return;
                 }
                 setQrPayload(data.qr);
+                setOrderId(data.orderId ?? null);
                 setMd5(data.md5 ?? null);
                 setMerchantLabel(
                     typeof data.merchantName === "string" && data.merchantName
@@ -178,6 +186,7 @@ export function KhqrOrderPayCard({
     const retryGenerate = useCallback(async () => {
         setError("");
         setQrPayload(null);
+        setOrderId(null);
         setMd5(null);
         setExpiresAtMs(null);
         setPayMeta(null);
@@ -198,6 +207,7 @@ export function KhqrOrderPayCard({
                 return;
             }
             setQrPayload(data.qr);
+            setOrderId(data.orderId ?? null);
             setMd5(data.md5 ?? null);
             setMerchantLabel(
                 typeof data.merchantName === "string" && data.merchantName
