@@ -170,6 +170,16 @@ async function initDb() {
     return initPromise;
 }
 
+async function checkDbHealth() {
+    await initDb();
+    if (usePostgres) {
+        const result = await pgPool.query("SELECT 1 AS ok");
+        return { ok: result.rows[0]?.ok === 1, engine: "postgres" };
+    }
+    sqliteDb.prepare("SELECT 1").get();
+    return { ok: true, engine: "sqlite" };
+}
+
 async function expireOpenOrdersForUser(userId) {
     await initDb();
     if (usePostgres) {
@@ -626,6 +636,7 @@ async function getFailureReport(fromMs, toMs) {
 module.exports = {
     db: usePostgres ? pgPool : sqliteDb,
     initDb,
+    checkDbHealth,
     expireOpenOrdersForUser,
     insertOrder,
     getLatestPendingOrderForUser,
