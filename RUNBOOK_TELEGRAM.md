@@ -45,3 +45,25 @@ JSON body:
 
 Open frontend **Owner dashboard** tab to inspect KPIs, order timeline, and latest event logs.
 
+## 6) Demo production stack
+
+Use Koyeb for the Node backend and Supabase or Neon for Postgres.
+
+Koyeb:
+
+- Build command: `npm install`
+- Run command: `npm run start`
+- Health check path: `/api/health`
+
+Required production additions:
+
+- `DATABASE_URL=postgresql://...`
+- `TELEGRAM_MINI_APP_URL=https://<cloudflare-frontend-domain>`
+
+Cloudflare frontend build:
+
+- `VITE_API_BASE_URL=https://<koyeb-backend-domain>`
+
+Telegram webhook:
+
+`{ "url": "https://<koyeb-backend-domain>/api/telegram/webhook" }`

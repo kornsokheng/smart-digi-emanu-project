@@ -78,9 +78,9 @@ async function sendWelcome(chatId) {
 async function sendOrderToBaristaGroup(orderId) {
     const { baristaGroupId } = getConfig();
     if (!baristaGroupId) return;
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) return;
-    const items = getOrderItems(orderId);
+    const items = await getOrderItems(orderId);
     const text = `New paid order received\n\n${formatOrderLines(order, items)}`;
     const res = await telegramApi("sendMessage", {
         chat_id: baristaGroupId,
@@ -92,30 +92,30 @@ async function sendOrderToBaristaGroup(orderId) {
             ],
         },
     });
-    appendOrderEvent(orderId, "barista_group_alert", { ok: res.ok });
+    await appendOrderEvent(orderId, "barista_group_alert", { ok: res.ok });
 }
 
 async function notifyUserPayment(orderId) {
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) return;
-    const map = getTelegramUser(order.user_id);
+    const map = await getTelegramUser(order.user_id);
     const chatId = order.telegram_chat_id || map?.chat_id;
     if (!chatId) return;
-    const items = getOrderItems(orderId);
+    const items = await getOrderItems(orderId);
     const text = `Payment confirmed.\n\n${formatOrderLines(order, items)}\n\nWe are preparing your order.`;
     const res = await telegramApi("sendMessage", { chat_id: chatId, text });
-    appendOrderEvent(orderId, "user_payment_notified", { ok: res.ok });
+    await appendOrderEvent(orderId, "user_payment_notified", { ok: res.ok });
 }
 
 async function notifyUserReady(orderId) {
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) return;
-    const map = getTelegramUser(order.user_id);
+    const map = await getTelegramUser(order.user_id);
     const chatId = order.telegram_chat_id || map?.chat_id;
     if (!chatId) return;
     const text = `Order #${order.id} is ready. Please collect your drink.`;
     const res = await telegramApi("sendMessage", { chat_id: chatId, text });
-    appendOrderEvent(orderId, "user_ready_notified", { ok: res.ok });
+    await appendOrderEvent(orderId, "user_ready_notified", { ok: res.ok });
 }
 
 async function answerCallback(callbackQueryId, text) {
@@ -132,7 +132,7 @@ async function handleTelegramUpdate(update) {
     if (msg?.text?.startsWith("/start")) {
         const userId = String(msg.from?.id || "");
         if (userId) {
-            upsertTelegramUser({
+            await upsertTelegramUser({
                 userId,
                 chatId: String(msg.chat?.id || userId),
                 username: msg.from?.username || null,
@@ -153,8 +153,8 @@ async function handleTelegramUpdate(update) {
         return;
     }
     if (action === "PREPARING") {
-        const changed = markOrderPreparing(orderId);
-        appendOrderEvent(orderId, "barista_preparing_click", {
+        const changed = await markOrderPreparing(orderId);
+        await appendOrderEvent(orderId, "barista_preparing_click", {
             by: cq.from?.id,
             changed,
         });
@@ -162,8 +162,8 @@ async function handleTelegramUpdate(update) {
         return;
     }
     if (action === "READY") {
-        const changed = markOrderReady(orderId);
-        appendOrderEvent(orderId, "barista_ready_click", {
+        const changed = await markOrderReady(orderId);
+        await appendOrderEvent(orderId, "barista_ready_click", {
             by: cq.from?.id,
             changed,
         });
@@ -181,4 +181,3 @@ module.exports = {
     notifyUserPayment,
     handleTelegramUpdate,
 };
-

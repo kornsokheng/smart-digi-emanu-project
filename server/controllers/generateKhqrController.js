@@ -90,7 +90,7 @@ function pickAmount(req, currencyCode) {
     return { amount: amt };
 }
 
-function generateKhqr(req, res) {
+async function generateKhqr(req, res) {
     const userId = req.body?.userId ?? req.body?.user_id;
     if (!userId || typeof userId !== "string") {
         return res.status(400).json({ error: "userId is required" });
@@ -130,7 +130,7 @@ function generateKhqr(req, res) {
     const now = Date.now();
     const expiresAt = now + FIVE_MIN_MS;
 
-    expireOpenOrdersForUser(userId);
+    await expireOpenOrdersForUser(userId);
 
     const uidSafe = String(userId).replace(/[^\w-]/g, "").slice(0, 10);
     const billNumber = `${uidSafe || "u"}-${String(now).slice(-10)}`.slice(
@@ -168,7 +168,7 @@ function generateKhqr(req, res) {
         return res.status(500).json({ error: "Unexpected KHQR response shape" });
     }
 
-    const orderId = insertOrder({
+    const orderId = await insertOrder({
         user_id: userId,
         qr,
         md5,
@@ -179,19 +179,19 @@ function generateKhqr(req, res) {
         created_at: now,
     });
 
-    const draft = consumeOrderDraft(userId);
+    const draft = await consumeOrderDraft(userId);
     if (draft) {
-        replaceOrderItems(orderId, draft.items || []);
-        setOrderCustomerMeta(orderId, {
+        await replaceOrderItems(orderId, draft.items || []);
+        await setOrderCustomerMeta(orderId, {
             customerName: draft.customerName || null,
             customerUsername: draft.customerUsername || null,
             telegramChatId: draft.telegramChatId || null,
         });
-        appendOrderEvent(orderId, "order_draft_attached", {
+        await appendOrderEvent(orderId, "order_draft_attached", {
             itemCount: Array.isArray(draft.items) ? draft.items.length : 0,
         });
     } else {
-        appendOrderEvent(orderId, "order_created", null);
+        await appendOrderEvent(orderId, "order_created", null);
     }
 
     return res.json({

@@ -22,7 +22,7 @@ function normalizeOrderItems(items) {
         .filter((item) => Number.isFinite(item.unitPrice));
 }
 
-function createOrderDraft(req, res) {
+async function createOrderDraft(req, res) {
     const userId = String(req.body?.userId || "").trim();
     if (!userId) {
         return res.status(400).json({ error: "userId is required" });
@@ -37,7 +37,7 @@ function createOrderDraft(req, res) {
     const telegramUser = req.body?.telegramUser || null;
 
     if (telegramUser?.id != null) {
-        upsertTelegramUser({
+        await upsertTelegramUser({
             userId: String(telegramUser.id),
             chatId: String(telegramUser.id),
             username: telegramUser.username || null,
@@ -45,9 +45,9 @@ function createOrderDraft(req, res) {
             lastName: telegramUser.last_name || null,
         });
     } else {
-        const existing = getTelegramUser(userId);
+        const existing = await getTelegramUser(userId);
         if (!existing) {
-            upsertTelegramUser({
+            await upsertTelegramUser({
                 userId,
                 chatId: userId,
                 username: customerUsername,
@@ -57,7 +57,7 @@ function createOrderDraft(req, res) {
         }
     }
 
-    upsertOrderDraft(userId, {
+    await upsertOrderDraft(userId, {
         userId,
         items,
         totalAmount,
@@ -71,10 +71,10 @@ function createOrderDraft(req, res) {
     return res.json({ success: true, itemCount: items.length });
 }
 
-function getOrdersReport(req, res) {
+async function getOrdersReport(req, res) {
     const fromMs = req.query.from ? Date.parse(String(req.query.from)) : undefined;
     const toMs = req.query.to ? Date.parse(String(req.query.to)) : undefined;
-    const rows = listOrders({
+    const orders = await listOrders({
         status: req.query.status ? String(req.query.status) : undefined,
         prepareStatus: req.query.prepareStatus
             ? String(req.query.prepareStatus)
@@ -83,34 +83,37 @@ function getOrdersReport(req, res) {
         fromMs: Number.isFinite(fromMs) ? fromMs : undefined,
         toMs: Number.isFinite(toMs) ? toMs : undefined,
         limit: req.query.limit ? Number(req.query.limit) : 300,
-    }).map((o) => ({
-        ...o,
-        items: getOrderItems(o.id),
-        events: getOrderEvents(o.id),
-    }));
+    });
+    const rows = await Promise.all(
+        orders.map(async (o) => ({
+            ...o,
+            items: await getOrderItems(o.id),
+            events: await getOrderEvents(o.id),
+        }))
+    );
     res.json({ orders: rows });
 }
 
-function getDailySummaryReport(req, res) {
+async function getDailySummaryReport(req, res) {
     const now = Date.now();
     const fromMs = req.query.from
         ? Date.parse(String(req.query.from))
         : now - 24 * 60 * 60 * 1000;
     const toMs = req.query.to ? Date.parse(String(req.query.to)) : now;
-    const summary = getDailySummary(
+    const summary = await getDailySummary(
         Number.isFinite(fromMs) ? fromMs : now - 24 * 60 * 60 * 1000,
         Number.isFinite(toMs) ? toMs : now
     );
     res.json({ summary });
 }
 
-function getFailuresReport(req, res) {
+async function getFailuresReport(req, res) {
     const now = Date.now();
     const fromMs = req.query.from
         ? Date.parse(String(req.query.from))
         : now - 24 * 60 * 60 * 1000;
     const toMs = req.query.to ? Date.parse(String(req.query.to)) : now;
-    const failures = getFailureReport(
+    const failures = await getFailureReport(
         Number.isFinite(fromMs) ? fromMs : now - 24 * 60 * 60 * 1000,
         Number.isFinite(toMs) ? toMs : now
     );
@@ -123,4 +126,3 @@ module.exports = {
     getDailySummaryReport,
     getFailuresReport,
 };
-

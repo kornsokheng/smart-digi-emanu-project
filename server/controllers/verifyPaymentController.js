@@ -23,7 +23,7 @@ async function verifyPayment(req, res) {
         return res.status(500).json({ error: "BAKONG_MERCHANT_TOKEN is not configured" });
     }
 
-    const order = getLatestPendingOrderForUser(userId);
+    const order = await getLatestPendingOrderForUser(userId);
     if (!order) {
         return res.status(404).json({
             error: "No active pending transaction for this user",
@@ -59,8 +59,8 @@ async function verifyPayment(req, res) {
     }
 
     if (isPaidSuccess(body)) {
-        markOrderPaid(order.id);
-        appendOrderEvent(order.id, "payment_confirmed", { provider: "bakong" });
+        await markOrderPaid(order.id);
+        await appendOrderEvent(order.id, "payment_confirmed", { provider: "bakong" });
         void sendOrderToBaristaGroup(order.id);
         void notifyUserPayment(order.id);
         return res.json({

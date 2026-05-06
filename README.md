@@ -45,3 +45,42 @@ JSON body:
 
 Open frontend **Owner dashboard** tab to inspect KPIs, order timeline, and latest event logs.
 
+## Production demo deployment
+
+Recommended demo stack:
+
+- Frontend: Cloudflare Workers/Pages
+- Backend: Koyeb Free Node.js service
+- Database: Supabase Free or Neon Free Postgres
+
+Backend environment variables for Koyeb:
+
+- `PORT`
+- `DATABASE_URL`
+- `BAKONG_ACCOUNT_USERNAME`
+- `BAKONG_MERCHANT_TOKEN`
+- `BAKONG_USE_SIT`
+- `MERCHANT_DISPLAY_NAME`
+- `MERCHANT_CITY`
+- `BAKONG_QR_CURRENCY`
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_BARISTA_GROUP_ID`
+- `TELEGRAM_MINI_APP_URL`
+
+Use these Koyeb settings:
+
+- Build command: `npm install`
+- Run command: `npm run start`
+- Health check path: `/api/health`
+
+After the backend has a public Koyeb URL, set the Telegram webhook:
+
+`POST https://<koyeb-backend-domain>/api/telegram/set-webhook`
+
+JSON body:
+
+`{ "url": "https://<koyeb-backend-domain>/api/telegram/webhook" }`
+
+For the Cloudflare frontend build, set:
+
+- `VITE_API_BASE_URL=https://<koyeb-backend-domain>`
