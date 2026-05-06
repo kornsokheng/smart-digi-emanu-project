@@ -1,5 +1,8 @@
 # Telegram Mini App Runbook
 
+For a simple end-to-end production deployment checklist, see
+[`DEPLOYMENT_GUIDE.md`](./DEPLOYMENT_GUIDE.md).
+
 ## 1) Security setup
 
 1. Rotate the previously exposed bot token in BotFather.

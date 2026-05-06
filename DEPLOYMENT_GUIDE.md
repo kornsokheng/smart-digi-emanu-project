@@ -91,26 +91,13 @@ Expected:
 
 ## 3) Cloudflare Frontend
 
-Set this Cloudflare environment variable:
-
-```text
-VITE_API_BASE_URL=https://smart-digi-emanu-project.onrender.com
-```
-
-Use this Cloudflare deploy command:
-
-```text
-npm run deploy
-```
-
-The deploy script installs frontend dependencies, builds `frontend/dist`, then runs Wrangler.
-
-Manual local deploy:
+Before deploying Cloudflare, build the frontend with the Render API URL:
 
 ```powershell
 $env:VITE_API_BASE_URL='https://smart-digi-emanu-project.onrender.com'
-npm run deploy
+npm run build --prefix frontend
 Remove-Item Env:\VITE_API_BASE_URL
+npm run deploy
 ```
 
 Cloudflare URL:
@@ -174,6 +161,5 @@ https://smart-digi-emanu-project.onrender.com/api/reports/daily-summary
 - Use Supabase pooler port `6543`, not direct database port `5432`.
 - If payment works locally but not Render, compare Render env vars with `.env`.
 - After changing backend code, push to GitHub and deploy latest commit on Render.
-- After changing frontend code or API URL, make sure Cloudflare has `VITE_API_BASE_URL`, then run `npm run deploy`.
-- If Cloudflare fails at `npx wrangler deploy`, check that the frontend build ran first and that `frontend/dist` exists.
+- After changing frontend code or API URL, rebuild with `VITE_API_BASE_URL` and run `npm run deploy`.
 - After changing `TELEGRAM_MINI_APP_URL`, redeploy/restart backend and send `/start` again. Old Telegram buttons keep old URLs.
