@@ -2,8 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
 
-const dataDir = path.join(__dirname, "..", "data");
-const dbPath = path.join(dataDir, "orders.db");
+const dataDir = process.env.DATA_DIR || path.join(__dirname, "..", "data");
+const dbPath = process.env.DB_PATH || path.join(dataDir, "orders.db");
 
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
