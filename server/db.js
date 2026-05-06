@@ -612,10 +612,17 @@ async function getDailySummary(fromMs, toMs) {
         AVG(CASE WHEN prepared_at IS NOT NULL AND paid_at IS NOT NULL THEN prepared_at - paid_at END) AS avg_prep_ms
       FROM orders
       WHERE created_at BETWEEN ${usePostgres ? "$1 AND $2" : "? AND ?"}`;
-    if (usePostgres) {
-        return normalizeRow((await pgPool.query(query, [fromMs, toMs])).rows[0]);
-    }
-    return normalizeRow(sqliteDb.prepare(query).get(fromMs, toMs));
+    const row = usePostgres
+        ? (await pgPool.query(query, [fromMs, toMs])).rows[0]
+        : sqliteDb.prepare(query).get(fromMs, toMs);
+    return {
+        total_orders: Number(row?.total_orders || 0),
+        paid_orders: Number(row?.paid_orders || 0),
+        expired_orders: Number(row?.expired_orders || 0),
+        revenue_khr: Number(row?.revenue_khr || 0),
+        revenue_usd: Number(row?.revenue_usd || 0),
+        avg_prep_ms: row?.avg_prep_ms == null ? null : Number(row.avg_prep_ms),
+    };
 }
 
 async function getFailureReport(fromMs, toMs) {
