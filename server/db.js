@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const usePostgres = Boolean(process.env.DATABASE_URL);
+const dbEngine = usePostgres ? "postgres" : "sqlite";
 
 let sqliteDb = null;
 let pgPool = null;
@@ -174,10 +175,10 @@ async function checkDbHealth() {
     await initDb();
     if (usePostgres) {
         const result = await pgPool.query("SELECT 1 AS ok");
-        return { ok: result.rows[0]?.ok === 1, engine: "postgres" };
+        return { ok: result.rows[0]?.ok === 1, engine: dbEngine };
     }
     sqliteDb.prepare("SELECT 1").get();
-    return { ok: true, engine: "sqlite" };
+    return { ok: true, engine: dbEngine };
 }
 
 async function expireOpenOrdersForUser(userId) {
@@ -635,6 +636,7 @@ async function getFailureReport(fromMs, toMs) {
 
 module.exports = {
     db: usePostgres ? pgPool : sqliteDb,
+    dbEngine,
     initDb,
     checkDbHealth,
     expireOpenOrdersForUser,

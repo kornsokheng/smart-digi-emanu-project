@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
-const { checkDbHealth } = require("./db");
+const { checkDbHealth, dbEngine } = require("./db");
 const { generateKhqr } = require("./controllers/generateKhqrController");
 const { verifyPayment } = require("./controllers/verifyPaymentController");
 const {
@@ -79,9 +79,19 @@ function createApp() {
         res.json({ ok: true });
     });
 
-    app.get("/api/health/db", asyncRoute(async (_req, res) => {
-        res.json(await checkDbHealth());
-    }));
+    app.get("/api/health/db", async (_req, res) => {
+        try {
+            res.json(await checkDbHealth());
+        } catch (err) {
+            console.error("database health error", err);
+            res.status(500).json({
+                ok: false,
+                engine: dbEngine,
+                message: err?.message || "Database health check failed",
+                code: err?.code,
+            });
+        }
+    });
 
     const distDir = path.join(__dirname, "..", "frontend", "dist");
     const distIndex = path.join(distDir, "index.html");

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Express + Bakong KHQR + React payment flow",
   "main": "server/index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "nodemon server/index.js",
     "start": "node server/index.js",
