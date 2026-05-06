@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/paymentApi";
 
-const POLL_MS = 2000;
+const POLL_MS = 1000;
 const PAYMENT_CHECK_GRACE_MS = 2 * 60 * 1000;
 
 function formatAmount(currency, amount) {
@@ -34,6 +34,7 @@ export function KhqrOrderPayCard({
     const [expiresAtMs, setExpiresAtMs] = useState(null);
     const [error, setError] = useState("");
     const [confirmed, setConfirmed] = useState(false);
+    const [checking, setChecking] = useState(false);
     const [payMeta, setPayMeta] = useState(null);
     const [merchantLabel, setMerchantLabel] = useState(null);
     const [nowMs, setNowMs] = useState(() => Date.now());
@@ -68,6 +69,7 @@ export function KhqrOrderPayCard({
             return;
         }
         try {
+            setChecking(true);
             const res = await api("/api/payment/check", {
                 method: "POST",
                 body: JSON.stringify({ userId: userId.trim(), orderId }),
@@ -86,6 +88,8 @@ export function KhqrOrderPayCard({
             setError(errBody.error || `Check failed (${res.status})`);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Network error");
+        } finally {
+            setChecking(false);
         }
     }, [userId, orderId, expiresAtMs, clearPoll, handleExpired, onPaid]);
 
@@ -96,6 +100,21 @@ export function KhqrOrderPayCard({
     useEffect(() => {
         return () => clearPoll();
     }, [clearPoll]);
+
+    useEffect(() => {
+        if (!qrPayload || confirmed) return;
+        const checkOnReturn = () => {
+            if (document.visibilityState === "visible") {
+                void checkRef.current();
+            }
+        };
+        document.addEventListener("visibilitychange", checkOnReturn);
+        window.addEventListener("focus", checkOnReturn);
+        return () => {
+            document.removeEventListener("visibilitychange", checkOnReturn);
+            window.removeEventListener("focus", checkOnReturn);
+        };
+    }, [qrPayload, confirmed]);
 
     useEffect(() => {
         if (!qrPayload || confirmed || expiresAtMs == null) return;
@@ -263,6 +282,9 @@ export function KhqrOrderPayCard({
                 <span className="lumho-pay-toolbar-title">Scan to pay</span>
             </div>
             {error ? <p className="lumho-error">{error}</p> : null}
+            {checking && !error ? (
+                <p className="lumho-muted">Checking payment status...</p>
+            ) : null}
             {qrPayload ? (
                 <article className="khqr-card lumho-khqr-card" aria-label="KHQR payment">
                     <header className="khqr-card-header">KHQR</header>

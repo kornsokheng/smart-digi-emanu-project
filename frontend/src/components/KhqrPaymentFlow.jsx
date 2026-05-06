@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/paymentApi";
 
-const POLL_MS = 2000;
+const POLL_MS = 1000;
 const PAYMENT_CHECK_GRACE_MS = 2 * 60 * 1000;
 
 function formatAmount(currency, amount) {
@@ -26,6 +26,7 @@ export function KhqrPaymentFlow() {
     const [statusMessage, setStatusMessage] = useState("");
     const [error, setError] = useState("");
     const [confirmed, setConfirmed] = useState(false);
+    const [checking, setChecking] = useState(false);
     const [payMeta, setPayMeta] = useState(null);
     const [merchantLabel, setMerchantLabel] = useState(null);
     const [nowMs, setNowMs] = useState(() => Date.now());
@@ -61,6 +62,7 @@ export function KhqrPaymentFlow() {
             return;
         }
         try {
+            setChecking(true);
             const res = await api("/api/payment/check", {
                 method: "POST",
                 body: JSON.stringify({ userId: userId.trim(), orderId }),
@@ -81,12 +83,29 @@ export function KhqrPaymentFlow() {
             setError(errBody.error || `Check failed (${res.status})`);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Network error");
+        } finally {
+            setChecking(false);
         }
     }, [userId, orderId, expiresAtMs, clearPoll, handleExpired]);
 
     useEffect(() => {
         return () => clearPoll();
     }, [clearPoll]);
+
+    useEffect(() => {
+        if (!qrPayload || confirmed) return;
+        const checkOnReturn = () => {
+            if (document.visibilityState === "visible") {
+                void checkPaymentOnce();
+            }
+        };
+        document.addEventListener("visibilitychange", checkOnReturn);
+        window.addEventListener("focus", checkOnReturn);
+        return () => {
+            document.removeEventListener("visibilitychange", checkOnReturn);
+            window.removeEventListener("focus", checkOnReturn);
+        };
+    }, [qrPayload, confirmed, checkPaymentOnce]);
 
     useEffect(() => {
         if (!qrPayload || confirmed || expiresAtMs == null) return;
@@ -197,6 +216,9 @@ export function KhqrPaymentFlow() {
                 )}
             </div>
             {error ? <p className="error">{error}</p> : null}
+            {checking && !error && !confirmed ? (
+                <p className="info">Checking payment status...</p>
+            ) : null}
             {confirmed ? (
                 <p className="success">{statusMessage}</p>
             ) : statusMessage ? (
