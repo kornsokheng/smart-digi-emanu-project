@@ -66,12 +66,22 @@ async function verifyPayment(req, res) {
         );
         body = b;
         if (httpStatus !== 200) {
+            await appendOrderEvent(order.id, "payment_check_http_failed", {
+                httpStatus,
+                responseCode: body?.responseCode,
+                responseMessage: body?.responseMessage,
+                errorCode: body?.errorCode,
+            });
             return res.status(404).json({
                 error: "Unable to confirm payment yet",
                 code: "NOT_FOUND_OR_PENDING",
             });
         }
     } catch (err) {
+        await appendOrderEvent(order.id, "payment_check_error", {
+            message: err?.message,
+            code: err?.code,
+        });
         return res.status(404).json({
             error: "Bakong API unreachable or transaction still pending",
             code: "NOT_FOUND_OR_PENDING",
@@ -90,6 +100,16 @@ async function verifyPayment(req, res) {
         });
     }
 
+    await appendOrderEvent(order.id, "payment_check_unpaid", {
+        responseCode: body?.responseCode,
+        responseMessage: body?.responseMessage,
+        errorCode: body?.errorCode,
+        dataStatus:
+            body?.data?.status ||
+            body?.data?.paymentStatus ||
+            body?.data?.transactionStatus ||
+            null,
+    });
     return res.status(404).json({
         error: "Payment not completed or still pending",
         code: "NOT_FOUND_OR_PENDING",
