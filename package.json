@@ -10,9 +10,10 @@
     "dev": "nodemon server/index.js",
     "start": "node server/index.js",
     "dev:frontend": "npm run dev --prefix frontend",
+    "build:frontend": "npm ci --prefix frontend && npm run build --prefix frontend",
     "test": "node --test server/*.test.js",
     "test:all": "npm test && npm run lint --prefix frontend",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run build:frontend && wrangler deploy",
     "preview": "wrangler dev"
   },
   "keywords": [],
