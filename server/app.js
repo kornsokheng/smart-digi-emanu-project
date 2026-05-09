@@ -1,8 +1,10 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
 const { checkDbHealth, dbEngine } = require("./db");
+const { DEFAULT_PROD, DEFAULT_SIT } = require("./services/bakongTransaction");
 const { generateKhqr } = require("./controllers/generateKhqrController");
 const { verifyPayment } = require("./controllers/verifyPaymentController");
 const {
@@ -30,6 +32,29 @@ function validateStartupConfig() {
             );
         }
     }
+}
+
+function getBakongConfigFingerprint() {
+    const token = process.env.BAKONG_MERCHANT_TOKEN || "";
+    const trimmedToken = token.trim();
+    const useSit = process.env.BAKONG_USE_SIT === "true";
+    const baseUrl =
+        useSit
+            ? DEFAULT_SIT
+            : process.env.BAKONG_API_BASE_URL || DEFAULT_PROD;
+
+    return {
+        accountUsername: process.env.BAKONG_ACCOUNT_USERNAME || null,
+        useSit,
+        baseUrl,
+        tokenPresent: Boolean(token),
+        tokenLength: token.length,
+        trimmedTokenLength: trimmedToken.length,
+        tokenStartsWithBearer: /^bearer\s+/i.test(trimmedToken),
+        tokenFingerprint: trimmedToken
+            ? crypto.createHash("sha256").update(trimmedToken).digest("hex").slice(0, 12)
+            : null,
+    };
 }
 
 function createApp() {
@@ -91,6 +116,10 @@ function createApp() {
                 code: err?.code,
             });
         }
+    });
+
+    app.get("/api/health/bakong-config", (_req, res) => {
+        res.json(getBakongConfigFingerprint());
     });
 
     const distDir = path.join(__dirname, "..", "frontend", "dist");
