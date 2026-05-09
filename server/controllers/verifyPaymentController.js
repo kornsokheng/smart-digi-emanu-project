@@ -71,6 +71,11 @@ async function verifyPayment(req, res) {
                 responseCode: body?.responseCode,
                 responseMessage: body?.responseMessage,
                 errorCode: body?.errorCode,
+                bodyType: typeof body,
+                bodySnippet:
+                    typeof body === "string"
+                        ? body.slice(0, 180)
+                        : JSON.stringify(body || {}).slice(0, 180),
             });
             return res.status(404).json({
                 error: "Unable to confirm payment yet",

@@ -17,8 +17,10 @@ async function checkTransactionByMd5(md5, token, options = {}) {
     const url = checkTransactionUrl(base);
     const axiosResponse = await axios.post(url, { md5 }, {
         headers: {
+            Accept: "application/json",
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "User-Agent": "smart-digi-menu/1.0 (+https://smart-digi-menu.kornsokheng2.workers.dev)",
         },
         timeout: 30000,
         validateStatus: () => true,
